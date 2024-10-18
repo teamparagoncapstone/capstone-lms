@@ -63,19 +63,28 @@ const VoiceExercisesList = ({ moduleTitle }: VoiceExercisesListProps) => {
           const response = await fetch(
             `https://flask-app-voice.vercel.app/api/voice-exercises?moduleTitle=${encodeURIComponent(
               moduleTitle
-            )}&studentId=${session.user.studentId}`
+            )}&studentId=${session.user.studentId}`, 
+            { mode: 'no-cors' } 
           );
+          
+          if (!response.ok) {
+            console.error("Failed to fetch voice exercises:", response.statusText);
+            return;
+          }
+  
           const data = await response.json();
           setVoiceExercises(data);
         } catch (error) {
           console.error("Error fetching voice exercises:", error);
         }
       };
+  
       fetchVoiceExercises();
     } else {
       console.error("Student ID is undefined or session not available.");
     }
   }, [moduleTitle, session?.user?.studentId]);
+  
   const startRecording = async () => {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
     const mediaRecorder = new MediaRecorder(stream);
