@@ -70,7 +70,7 @@ const VoiceExercisesList = ({ moduleTitle }: VoiceExercisesListProps) => {
     const fetchVoiceExercises = async () => {
       try {
         const response = await fetch(
-          `https://flaskapp-voice.vercel.app/api/voice-exercises?moduleTitle=${encodeURIComponent(moduleTitle)}&studentId=${session.user.studentId}`
+          `https://flask-app-voice.vercel.app/api/voice-exercises?moduleTitle=${encodeURIComponent(moduleTitle)}&studentId=${session.user.studentId}`
         );
         if (!response.ok) {
           throw new Error(`Failed to fetch voice exercises: ${response.status}`);
@@ -122,7 +122,7 @@ const VoiceExercisesList = ({ moduleTitle }: VoiceExercisesListProps) => {
 
     try {
       const response = await fetch(
-        "https://flaskapp-voice.vercel.app/api/voice-exercises-history",
+        "https://flask-app-voice.vercel.app/api/voice-exercises-history",
         {
           method: "POST",
           body: formData,
@@ -168,7 +168,7 @@ const VoiceExercisesList = ({ moduleTitle }: VoiceExercisesListProps) => {
   const handleSubmitExercise = async () => {
     try {
       const response = await fetch(
-        "https://flaskapp-voice.vercel.app/api/submit-exercise",
+        "https://flask-app-voice.vercel.app/api/submit-exercise",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
