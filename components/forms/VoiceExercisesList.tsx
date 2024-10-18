@@ -57,6 +57,7 @@ const VoiceExercisesList = ({ moduleTitle }: VoiceExercisesListProps) => {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const router = useRouter();
   useEffect(() => {
+    console.log(session); 
     if (!session || !session.user || !session.user.studentId) {
       console.error("Student ID is undefined or session not available.");
       setError("Please log in to access the voice exercises.");
