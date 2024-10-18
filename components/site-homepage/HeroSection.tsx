@@ -46,10 +46,10 @@ const HeroSection: React.FC = () => {
           className="col-span-4 place-self-center mt-4 lg:mt-0"
         >
           <div className=" w-[350px] h-[350px] lg:w-[400px] lg:h-[400px] relative dark:text-white light:text-black">
-            <Image
+            <img
               rel="preload"
               fetchPriority="high"
-              src="/images/bbbb2.png"
+              src="/images/bccsi1.png"
               alt="logo"
               className="absolute transform -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2"
               width={300}

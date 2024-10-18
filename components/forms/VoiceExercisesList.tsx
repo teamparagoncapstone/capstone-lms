@@ -57,22 +57,20 @@ const VoiceExercisesList = ({ moduleTitle }: VoiceExercisesListProps) => {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const router = useRouter();
   useEffect(() => {
-    if (session?.user?.studentId) {  // Wait until the session is available
+    if (session?.user?.studentId) {
       const fetchVoiceExercises = async () => {
         try {
           const response = await fetch(
             `https://flaskapp-voice.vercel.app/api/voice-exercises?moduleTitle=${encodeURIComponent(
               moduleTitle
-            )}&studentId=${session.user.studentId}`  // Ensure studentId is passed correctly
+            )}&studentId=${session.user.studentId}`
           );
           const data = await response.json();
-          // Handle the data as required
-          setVoiceExercises(data); // Assuming you're setting the exercises here
+          setVoiceExercises(data);
         } catch (error) {
           console.error("Error fetching voice exercises:", error);
         }
       };
-  
       fetchVoiceExercises();
     } else {
       console.error("Student ID is undefined or session not available.");
