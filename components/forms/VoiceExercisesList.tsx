@@ -64,13 +64,23 @@ const VoiceExercisesList = ({ moduleTitle }: VoiceExercisesListProps) => {
     }
 
     const fetchVoiceExercises = async () => {
+      if (!moduleTitle || !session?.user?.studentId) {
+        setError("Missing module title or student ID");
+        return;
+      }
+
       try {
         const response = await fetch(
-          `https://flask-app-voice.vercel.app/api/voice-exercises?moduleTitle=${encodeURIComponent(moduleTitle)}&studentId=${session.user.studentId}`
+          `https://flask-app-voice.vercel.app/api/voice-exercises?moduleTitle=${encodeURIComponent(moduleTitle)}&studentId=${session.user.studentId}`,
+          {
+            credentials: 'include',  // Ensures cookies are sent with the request
+          }
         );
+
         if (!response.ok) {
           throw new Error(`Failed to fetch voice exercises: ${response.status}`);
         }
+
         const data = await response.json();
         setVoiceExercises(data);
         setCurrentExercise(data[0]);  // Set the first exercise as default
@@ -82,7 +92,6 @@ const VoiceExercisesList = ({ moduleTitle }: VoiceExercisesListProps) => {
 
     fetchVoiceExercises();
   }, [moduleTitle, session]);
-
   const startRecording = async () => {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
     const mediaRecorder = new MediaRecorder(stream);
