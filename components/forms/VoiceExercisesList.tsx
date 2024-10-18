@@ -61,7 +61,7 @@ const VoiceExercisesList = ({ moduleTitle }: VoiceExercisesListProps) => {
       const fetchVoiceExercises = async () => {
         try {
           const response = await fetch(
-            `https://flaskapp-voice.vercel.app/api/voice-exercises?moduleTitle=${encodeURIComponent(
+            `https://flask-app-voice.vercel.app/api/voice-exercises?moduleTitle=${encodeURIComponent(
               moduleTitle
             )}&studentId=${session.user.studentId}`
           );
@@ -114,7 +114,7 @@ const VoiceExercisesList = ({ moduleTitle }: VoiceExercisesListProps) => {
 
     try {
       const response = await fetch(
-        "https://flaskapp-voice.vercel.app/api/voice-exercises-history",
+        "https://flask-app-voice.vercel.app/api/voice-exercises-history",
         {
           method: "POST",
           body: formData,
