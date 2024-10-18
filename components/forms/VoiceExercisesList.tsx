@@ -57,34 +57,33 @@ const VoiceExercisesList = ({ moduleTitle }: VoiceExercisesListProps) => {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const router = useRouter();
   useEffect(() => {
-    if (session?.user?.studentId) {
-      const fetchVoiceExercises = async () => {
-        try {
-          const response = await fetch(
-            `https://flask-app-voice.vercel.app/api/voice-exercises?moduleTitle=${encodeURIComponent(
-              moduleTitle
-            )}&studentId=${session.user.studentId}`, 
-            { mode: 'no-cors' } 
-          );
-          
-          if (!response.ok) {
-            console.error("Failed to fetch voice exercises:", response.statusText);
-            return;
-          }
   
-          const data = await response.json();
-          setVoiceExercises(data);
-        } catch (error) {
-          console.error("Error fetching voice exercises:", error);
-        }
-      };
-  
-      fetchVoiceExercises();
-    } else {
+    if (!session || !session.user || !session.user.studentId) {
       console.error("Student ID is undefined or session not available.");
+      return;  
     }
-  }, [moduleTitle, session?.user?.studentId]);
   
+  
+    console.log("Module Title:", moduleTitle);
+    console.log("Student ID:", session.user.studentId);
+  
+    const fetchVoiceExercises = async () => {
+      try {
+        const response = await fetch(
+          `https://flask-app-voice.vercel.app/api/voice-exercises?moduleTitle=${encodeURIComponent(moduleTitle)}&studentId=${session.user.studentId}`
+        );
+        if (!response.ok) {
+          throw new Error(`Failed to fetch voice exercises: ${response.status}`);
+        }
+        const data = await response.json();
+        setVoiceExercises(data);
+      } catch (error) {
+        console.error("Error fetching voice exercises:", error);
+      }
+    };
+  
+    fetchVoiceExercises();
+  }, [moduleTitle, session]);
   const startRecording = async () => {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
     const mediaRecorder = new MediaRecorder(stream);
