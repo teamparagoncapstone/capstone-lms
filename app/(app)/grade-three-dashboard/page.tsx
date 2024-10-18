@@ -31,20 +31,20 @@ interface QuizHistoryItem {
 
 export default function DashboardPage() {
   const { data: session, status } = useSession();
+  const router = useRouter();
   const [quizHistory, setQuizHistory] = useState<QuizHistoryItem[]>([]);
-  const [completedModuleTitles, setCompletedModuleTitles] = useState<Set<string>>(new Set());
+  const [completedModuleTitles, setCompletedModuleTitles] = useState<
+    Set<string>
+  >(new Set());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [assignedCount, setAssignedCount] = useState(0);
-
-  // Move useRouter hook here, so it is always called unconditionally
-  const router = useRouter();
 
   useEffect(() => {
     const fetchData = async () => {
       if (!session) return;
 
-      if (session?.user?.grade !== "GradeOne") {
+      if (session?.user?.grade !== "GradeThree") {
         setLoading(false);
         return;
       }
@@ -52,7 +52,9 @@ export default function DashboardPage() {
       const studentId = session.user.studentId;
 
       try {
-        const quizResponse = await fetch(`/api/get-quiz-history?studentId=${studentId}`);
+        const quizResponse = await fetch(
+          `/api/get-quiz-history?studentId=${studentId}`
+        );
         if (!quizResponse.ok) throw new Error("Failed to fetch quiz history");
         const quizData = await quizResponse.json();
 
@@ -66,7 +68,9 @@ export default function DashboardPage() {
         setCompletedModuleTitles(uniqueQuizTitles);
         setQuizHistory(quizData.history);
 
-        const assignedResponse = await fetch(`/api/fetch-assigned-modules?studentId=${studentId}`);
+        const assignedResponse = await fetch(
+          `/api/fetch-assigned-modules?studentId=${studentId}`
+        );
         if (!assignedResponse.ok)
           throw new Error("Failed to fetch assigned modules");
         const assignedData = await assignedResponse.json();
@@ -86,12 +90,14 @@ export default function DashboardPage() {
 
         const gradeOneResponse = await fetch("/api/grade-three-module");
         if (!gradeOneResponse.ok)
-          throw new Error("Failed to fetch grade one modules");
+          throw new Error("Failed to fetch grade three modules");
         const gradeOneData = await gradeOneResponse.json();
 
         setAssignedCount(gradeOneData.count);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "An unknown error occurred");
+        setError(
+          err instanceof Error ? err.message : "An unknown error occurred"
+        );
       } finally {
         setLoading(false);
       }
@@ -99,10 +105,9 @@ export default function DashboardPage() {
     fetchData();
   }, [session]);
 
-  // Always call the router hook before the conditional returns
   if (status === "loading") return <Loading />;
 
-  if (status === "unauthenticated" || session?.user?.grade !== "GradeOne") {
+  if (status === "unauthenticated" || session?.user?.grade !== "GradeThree") {
     return <UnauthorizedPage />;
   }
 
@@ -123,8 +128,8 @@ export default function DashboardPage() {
         <Separator />
       </div>
       <div
-        className="bg-cover bg-center h-screen absolute top-0 left-0 w-full bg-opacity-100"
-        style={{ backgroundImage: 'url("/images/voice1-bg.jpg")' }}
+        className="bg-cover bg-center h-screen  absolute top -0 left-0 w-full bg-opacity-100"
+        style={{ backgroundImage: 'url("/images/voice1-bg1.jpg")' }}
       >
         <div className="flex-1 space-y-4 p-8 md:p-4 pt-6">
           <div className="flex flex-col md:flex-row items-center justify-between space-y-2 md:space-y-0 md:items-center">
@@ -172,7 +177,8 @@ export default function DashboardPage() {
                     <div
                       className="h-2 bg-green-200 rounded mt-2"
                       style={{ width: `${(assignedCount / 10) * 100}%` }}
-                    ></div>
+                    ></div>{" "}
+                    {/* Simple progress bar */}
                   </CardContent>
                 </Card>
                 <Card

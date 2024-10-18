@@ -111,7 +111,7 @@ export default function HistoryQuiz() {
       <div
         className="bg-gradient-to-r from-blue-200 to-yellow-300 min-h-screen p-4 flex flex-col items-center bg-center bg-cover"
         style={{
-          backgroundImage: 'url("/images/student-history-math.png")',
+          backgroundImage: 'url("/images/student-history-math1.png")',
           backgroundSize: "cover",
         }}
       >

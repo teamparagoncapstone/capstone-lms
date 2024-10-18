@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma'; 
-import { hash } from "bcrypt";
+import { prisma } from '@/lib/prisma';
+import { hash } from 'bcrypt';
+import { logAudit } from '@/lib/auditLogger'; 
 
 enum Grade {
   GradeOne = 'GradeOne',
@@ -40,8 +41,10 @@ export async function PUT(req: Request) {
     if (!body.id) {
       return NextResponse.json({ error: 'Student ID is required' }, { status: 400 });
     }
+
     const hashedPassword = await hash(body.studentPassword, 12);
 
+    // Update the student
     const updatedStudent = await prisma.student.update({
       where: { id: body.id },
       data: {
@@ -62,11 +65,13 @@ export async function PUT(req: Request) {
             name: `${body.firstname} ${body.lastname}`,
             username: body.studentUsername,
             password: hashedPassword,
-           
           },
         },
       },
     });
+
+   
+    await logAudit(body.studentUsername, 'Update Student', 'Student', `Updated student : ${body.id}`);
 
     return NextResponse.json(updatedStudent);
   } catch (error) {
@@ -83,7 +88,7 @@ export async function DELETE(req: Request) {
       return NextResponse.json({ error: 'Student ID is required' }, { status: 400 });
     }
 
-
+   
     const student = await prisma.student.findUnique({
       where: { id: body.id },
       select: { userId: true },
@@ -98,12 +103,15 @@ export async function DELETE(req: Request) {
       where: { id: body.id },
     });
 
-    
+  
     if (student.userId) {
       await prisma.user.delete({
         where: { id: student.userId },
       });
     }
+
+
+    await logAudit(null, 'Delete Student', 'Student', `Deleted student with ID: ${body.id}`);
 
     return NextResponse.json(deletedStudent);
   } catch (error) {

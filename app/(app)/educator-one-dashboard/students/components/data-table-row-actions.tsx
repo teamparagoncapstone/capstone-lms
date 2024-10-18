@@ -1,12 +1,13 @@
 "use client";
 import React, { useState } from "react";
-import Image from 'next/image';
+import Image from "next/image";
 import { Row } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -93,7 +94,7 @@ export function DataTableRowActions<TData>({
     image: row.original.image || "",
   });
 
-  const [formErrors] = useState<any>({});
+  const [formErrors, setFormErrors] = useState<any>({});
   const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (field: keyof FormData, value: any) => {

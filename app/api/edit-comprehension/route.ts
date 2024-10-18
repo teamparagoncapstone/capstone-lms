@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma'; 
+import { prisma } from '@/lib/prisma';
+import { logAudit } from '@/lib/auditLogger'; 
 
 enum Grade {
   GradeOne = 'GradeOne',
@@ -45,19 +46,20 @@ export async function PUT(req: Request) {
       },
     });
 
+   
+    await logAudit(body.userId, 'Update ComprehensionTest', 'ComprehensionTest', `Updated comprehension test : ${body.question}`);
+
     return NextResponse.json(updatedComprehension);
   } catch (error) {
     console.error('Error updating comprehension test:', error);
 
-    
     if (error instanceof Error) {
       if (error.message.includes('P2025')) {
         return NextResponse.json({ error: 'Comprehension Test not found' }, { status: 404 });
       }
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
-    
-    
+
     return NextResponse.json({ error: 'Failed to update comprehension test' }, { status: 500 });
   }
 }
@@ -67,12 +69,15 @@ export async function DELETE(req: Request) {
     const body: DeleteComprehensionRequestBody = await req.json();
 
     if (!body.id) {
-      return NextResponse.json({ error: 'Comprehesion Test ID is required' }, { status: 400 });
+      return NextResponse.json({ error: 'Comprehension Test ID is required' }, { status: 400 });
     }
 
     const deletedComprehension = await prisma.comprehensionTest.delete({
       where: { id: body.id },
     });
+
+    
+    await logAudit(null, 'Delete ComprehensionTest', 'ComprehensionTest', `Deleted comprehension test with ID: ${body.id}`);
 
     return NextResponse.json(deletedComprehension);
   } catch (error) {
@@ -80,12 +85,11 @@ export async function DELETE(req: Request) {
 
     if (error instanceof Error) {
       if (error.message.includes('P2025')) {
-        return NextResponse.json({ error: 'Comprehesion Test not found' }, { status: 404 });
+        return NextResponse.json({ error: 'Comprehension Test not found' }, { status: 404 });
       }
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    
     return NextResponse.json({ error: 'Failed to delete comprehension test' }, { status: 500 });
   }
 }

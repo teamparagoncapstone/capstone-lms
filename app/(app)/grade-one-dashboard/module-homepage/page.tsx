@@ -2,7 +2,7 @@
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 
 import TeamSwitcher from "@/app/(app)/grade-one-dashboard/_components/team-switcher";
-
+import { FaArrowLeft } from "react-icons/fa";
 import { SystemMenu } from "../_components/system-menu";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
@@ -60,9 +60,15 @@ export default function DashboardPage() {
       <div className="flex">
         <div
           className="bg-cover bg-center h-screen -z-10 absolute top -0 left-0 w-full bg-opacity-100"
-          style={{ backgroundImage: 'url("/images/bgfront.jpg")' }}
+          style={{ backgroundImage: 'url("/images/bgfront1.jpg")' }}
         ></div>
         <div className="flex-1 space-y-4 p-8 md:p-4 pt-6 relative ">
+          <Button
+            className="text-blue-500 bg-black hover:bg-blue-100 p-4 rounded-full shadow-lg"
+            onClick={() => router.push("/grade-one-dashboard")}
+          >
+            <FaArrowLeft className="text-2xl" />
+          </Button>
           <div className="flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0 md:items-center pt-10">
             {modules.length > 0 ? (
               <Tabs
@@ -95,7 +101,7 @@ export default function DashboardPage() {
                         </CardTitle>
                         <Image
                           src={
-                            module.imageModule || "/images/default-image.jpg"
+                            module.imageModule || "/images/default-image1.jpg"
                           }
                           alt="module image"
                           className="mx-auto my-auto"

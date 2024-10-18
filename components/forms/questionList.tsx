@@ -47,34 +47,45 @@ export function QuestionList({ moduleTitle }: QuestionListProps) {
   const { toast } = useToast();
 
   useEffect(() => {
-    const fetchQuestions = async () => {
+    const fetchQuizData = async () => {
       try {
-        const response = await fetch(
-          `/api/get-questions?moduleTitle=${moduleTitle}`
+        const statusResponse = await fetch(
+          `/api/check-submission?studentId=${studentId}&moduleTitle=${moduleTitle}`
         );
-        const data = await response.json();
+        const statusData = await statusResponse.json();
 
-        if (!response.ok || data.status === "error") {
-          setErrorMessage(data.message);
+        if (!statusResponse.ok || statusData.status === "error") {
+          setErrorMessage(statusData.message);
           return;
         }
 
-        setQuestions(data.questions);
+        // If the quiz has been submitted, mark it as submitted and stop further execution
+        if (statusData.isSubmitted) {
+          setIsSubmitted(true);
+          return;
+        }
+
+        // Fetch questions if the quiz has not been submitted
+        const questionsResponse = await fetch(
+          `/api/get-questions?moduleTitle=${moduleTitle}`
+        );
+        const questionsData = await questionsResponse.json();
+
+        if (!questionsResponse.ok || questionsData.status === "error") {
+          setErrorMessage(questionsData.message);
+          return;
+        }
+
+        setQuestions(questionsData.questions);
       } catch (error) {
-        console.error("Error fetching questions:", error);
-        setErrorMessage("Failed to fetch questions");
+        console.error("Error fetching quiz data:", error);
+        setErrorMessage("Failed to load quiz data.");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchQuestions();
-
-    const submissionStatusKey = `quiz-submitted-${studentId}-${moduleTitle}`;
-    const submissionStatus = localStorage.getItem(submissionStatusKey);
-    if (submissionStatus) {
-      setIsSubmitted(true);
-    }
+    fetchQuizData();
   }, [moduleTitle, studentId]);
 
   const handleSubmit = async (answers: { [key: string]: string }) => {
@@ -134,14 +145,10 @@ export function QuestionList({ moduleTitle }: QuestionListProps) {
           });
 
           if (!response.ok) {
-            const errorData = await response.json();
             throw new Error("Failed to submit quiz");
           }
         })
       );
-
-      const submissionStatusKey = `quiz-submitted-${studentId}-${moduleTitle}`;
-      localStorage.setItem(submissionStatusKey, "true");
 
       setIsSubmitted(true);
       setScore(percentage);

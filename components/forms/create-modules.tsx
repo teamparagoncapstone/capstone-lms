@@ -230,7 +230,7 @@ export function CreateModules() {
           </Card>
           <Card className="mt-2">
             <CardContent>
-              <Label>Module Image</Label>
+              <Label>Module Image (Module Cover Page)</Label>
               <FileUpload
                 apiEndpoint="moduleImage"
                 value={formData.imageModule}

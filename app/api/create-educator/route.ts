@@ -1,6 +1,8 @@
+"use client";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { hash } from "bcrypt";
+import { logAudit } from "@/lib/auditLogger"
 
 export async function POST(req: Request) {
   try {
@@ -40,6 +42,8 @@ export async function POST(req: Request) {
       },
     });
 
+ 
+
     // Create educator
     const educator = await prisma.educator.create({
       data: {
@@ -56,6 +60,9 @@ export async function POST(req: Request) {
         },
       },
     });
+
+    // Log educator creation audit
+    await logAudit(createdUser.id, 'Educator Creation', 'Educator', `Educator created with username: ${username}`);
 
     return NextResponse.json({
       status: 'success',

@@ -10,14 +10,13 @@ import { useEffect, useState } from "react";
 import { Separator } from "@/components/ui/separator";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import UnauthorizedPage from "@/components/forms/unauthorized";
-import Loading from "./loading";
-
 import {
   FaClipboardList,
   FaClipboardCheck,
   FaHourglassHalf,
 } from "react-icons/fa";
+import UnauthorizedPage from "@/components/forms/unauthorized";
+import Loading from "./loading";
 
 interface QuizHistoryItem {
   Question: {
@@ -31,14 +30,14 @@ interface QuizHistoryItem {
 
 export default function DashboardPage() {
   const { data: session, status } = useSession();
+  const router = useRouter();
   const [quizHistory, setQuizHistory] = useState<QuizHistoryItem[]>([]);
-  const [completedModuleTitles, setCompletedModuleTitles] = useState<Set<string>>(new Set());
+  const [completedModuleTitles, setCompletedModuleTitles] = useState<
+    Set<string>
+  >(new Set());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [assignedCount, setAssignedCount] = useState(0);
-
-  // Move useRouter hook here, so it is always called unconditionally
-  const router = useRouter();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -52,7 +51,9 @@ export default function DashboardPage() {
       const studentId = session.user.studentId;
 
       try {
-        const quizResponse = await fetch(`/api/get-quiz-history?studentId=${studentId}`);
+        const quizResponse = await fetch(
+          `/api/get-quiz-history?studentId=${studentId}`
+        );
         if (!quizResponse.ok) throw new Error("Failed to fetch quiz history");
         const quizData = await quizResponse.json();
 
@@ -66,7 +67,9 @@ export default function DashboardPage() {
         setCompletedModuleTitles(uniqueQuizTitles);
         setQuizHistory(quizData.history);
 
-        const assignedResponse = await fetch(`/api/fetch-assigned-modules?studentId=${studentId}`);
+        const assignedResponse = await fetch(
+          `/api/fetch-assigned-modules?studentId=${studentId}`
+        );
         if (!assignedResponse.ok)
           throw new Error("Failed to fetch assigned modules");
         const assignedData = await assignedResponse.json();
@@ -91,7 +94,9 @@ export default function DashboardPage() {
 
         setAssignedCount(gradeOneData.count);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "An unknown error occurred");
+        setError(
+          err instanceof Error ? err.message : "An unknown error occurred"
+        );
       } finally {
         setLoading(false);
       }
@@ -99,7 +104,6 @@ export default function DashboardPage() {
     fetchData();
   }, [session]);
 
-  // Always call the router hook before the conditional returns
   if (status === "loading") return <Loading />;
 
   if (status === "unauthenticated" || session?.user?.grade !== "GradeOne") {
@@ -123,8 +127,8 @@ export default function DashboardPage() {
         <Separator />
       </div>
       <div
-        className="bg-cover bg-center h-screen absolute top-0 left-0 w-full bg-opacity-100"
-        style={{ backgroundImage: 'url("/images/voice1-bg.jpg")' }}
+        className="bg-cover bg-center h-screen  absolute top -0 left-0 w-full bg-opacity-100"
+        style={{ backgroundImage: 'url("/images/bgdash21.png")' }}
       >
         <div className="flex-1 space-y-4 p-8 md:p-4 pt-6">
           <div className="flex flex-col md:flex-row items-center justify-between space-y-2 md:space-y-0 md:items-center">
@@ -133,7 +137,7 @@ export default function DashboardPage() {
             </h2>
             <div>
               <h2 className="text-4xl font-bold tracking-tight text-center text-green-600 z-10">
-                Grade 3
+                Grade 1
               </h2>
             </div>
             <div className="flex items-center space-x-2 z-10">
@@ -142,7 +146,7 @@ export default function DashboardPage() {
                   router.push("/grade-one-dashboard/module-homepage")
                 }
                 size="lg"
-                className="ml-auto mt-8 mr-4 bg-blue-500 hover:bg-blue-400 transition z-10"
+                className="ml-auto mt-8 mr-4 bg-orange-500 hover:bg-orange-400 transition z-10"
               >
                 Go to Module
               </Button>
@@ -172,7 +176,8 @@ export default function DashboardPage() {
                     <div
                       className="h-2 bg-green-200 rounded mt-2"
                       style={{ width: `${(assignedCount / 10) * 100}%` }}
-                    ></div>
+                    ></div>{" "}
+                    {/* Simple progress bar */}
                   </CardContent>
                 </Card>
                 <Card

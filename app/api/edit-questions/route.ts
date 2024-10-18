@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma'; 
+import { prisma } from '@/lib/prisma';
+import { logAudit } from '@/lib/auditLogger'; 
 
 enum Grade {
   GradeOne = 'GradeOne',
@@ -31,6 +32,7 @@ export async function PUT(req: Request) {
       return NextResponse.json({ error: 'Question ID is required' }, { status: 400 });
     }
 
+ 
     const updatedQuestion = await prisma.questions.update({
       where: { id: body.id },
       data: {
@@ -45,19 +47,20 @@ export async function PUT(req: Request) {
       },
     });
 
+    
+    await logAudit(body.userId, 'Update Question', 'Question', `Updated question : ${body.question}`);
+
     return NextResponse.json(updatedQuestion);
   } catch (error) {
     console.error('Error updating question:', error);
 
-    
     if (error instanceof Error) {
       if (error.message.includes('P2025')) {
         return NextResponse.json({ error: 'Question not found' }, { status: 404 });
       }
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
-    
-    
+
     return NextResponse.json({ error: 'Failed to update question' }, { status: 500 });
   }
 }
@@ -70,9 +73,13 @@ export async function DELETE(req: Request) {
       return NextResponse.json({ error: 'Question ID is required' }, { status: 400 });
     }
 
+   
     const deletedQuestion = await prisma.questions.delete({
       where: { id: body.id },
     });
+
+   
+    await logAudit(null, 'Delete Module', 'Question', `Deleted question with ID: ${body.id}`);
 
     return NextResponse.json(deletedQuestion);
   } catch (error) {
@@ -85,7 +92,6 @@ export async function DELETE(req: Request) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    
     return NextResponse.json({ error: 'Failed to delete question' }, { status: 500 });
   }
 }

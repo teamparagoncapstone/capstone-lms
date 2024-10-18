@@ -8,12 +8,7 @@ import {
 } from "@/components/ui/menubar";
 import { Separator } from "@/components/ui/separator";
 import { list } from "../data/lists";
-import {
-  BookMarkedIcon,
-  CircleUserRoundIcon,
-  GraduationCapIcon,
-  FileTextIcon,
-} from "lucide-react";
+import { CircleUserRoundIcon, FileIcon, LoaderCircle } from "lucide-react";
 import Link from "next/link";
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -59,11 +54,20 @@ export function Sidebar({ className }: SidebarProps) {
                 </button>
               </Link>
             </div>
+            <Separator />
             <div className="mb-2">
               <Link href="/admin-dashboard/auditLogs">
                 <button className="flex items-center w-full p-2 text-left bg-gray-200 rounded hover:bg-gray-300">
-                  <CircleUserRoundIcon className="mr-2" />
+                  <FileIcon className="mr-2" />
                   View Audit Logs
+                </button>
+              </Link>
+            </div>
+            <div className="mb-2">
+              <Link href="/admin-dashboard/progressBar">
+                <button className="flex items-center w-full p-2 text-left bg-gray-200 rounded hover:bg-gray-300">
+                  <LoaderCircle className="mr-2" />
+                  Progress Bar
                 </button>
               </Link>
             </div>

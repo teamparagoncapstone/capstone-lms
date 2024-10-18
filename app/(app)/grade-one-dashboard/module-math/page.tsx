@@ -81,24 +81,24 @@ export default function ModuleMathPage() {
         </div>
         <Separator />
       </div>
-      <div className="relative flex-1 p-8 md:p-4 pt-6 h-screen w-full bg-cover bg-center">
+      <div className="relative flex-1 p-4 md:p-4 pt-6 h-screen w-full bg-cover bg-center">
         <div className="absolute inset-0 z-0 overflow-hidden">
           <div
             className="absolute inset-0 bg-cover bg-center"
             style={{
-              backgroundImage: 'url("/images/math-module.png")',
+              backgroundImage: 'url("/images/math-module1.png")',
               filter: "blur(6px)",
             }}
           ></div>
         </div>
-        <div className="relative bg-opacity-60 p-8">
+        <div className="relative bg-opacity-60 p-4 md:p-8">
           <div className="flex flex-col items-center">
-            <h2 className="text-4xl font-black mb-8 px-3 py-3 rounded-lg bg-indigo-300 border border-black ">
+            <h2 className="text-2xl md:text-4xl font-black mb-4 px-3 py-3 rounded-lg bg-indigo-300 border border-black">
               Module for Grade 1
             </h2>
             <div className="flex flex-col md:flex-row w-full max-w-7xl">
               <div className="flex-1 flex items-center justify-center mb-4 md:mb-0">
-                <Card className="w-full max-w-2xl h-[500px] bg-amber-300 shadow-2xl shadow-neutral-900">
+                <Card className="w-full max-w-xs md:max-w-2xl h-auto md:h-[500px] bg-amber-300 shadow-2xl shadow-neutral-900">
                   <CardContent className="flex items-center justify-center h-full">
                     <NextVideo src={module.videoModule} />
                   </CardContent>
@@ -106,34 +106,34 @@ export default function ModuleMathPage() {
               </div>
               <div className="flex-1 flex flex-col items-start pl-4 text-wrap break-all">
                 <Card
-                  className="w-full max-w-2xl h-[500px] shadow-2xl shadow-neutral-900 bg-cover bg-bottom "
-                  style={{ backgroundImage: 'url("/images/math.png")' }}
+                  className="w-full max-w-xs md:max-w-2xl h-auto md:h-[500px] shadow-2xl shadow-neutral-900 bg-cover bg-bottom"
+                  style={{ backgroundImage: 'url("/images/math1.png")' }}
                 >
-                  <CardTitle className="text-3xl font-extrabold  text-center">
+                  <CardTitle className="text-2xl md:text-3xl font-extrabold text-center">
                     Module Title:{" "}
-                    <p className="font-normal text-2xl font-sans  text-center">
+                    <p className="font-normal text-lg md:text-2xl font-sans text-center">
                       {module.moduleTitle}
                     </p>
                   </CardTitle>
-                  <CardDescription className="text-xl font-extrabold text-black pt-4 pl-2">
+                  <CardDescription className="text-lg md:text-xl font-extrabold text-black pt-4 pl-2">
                     Description:{" "}
-                    <p className="font-normal text-xl font-sans">
+                    <p className="font-normal text-base md:text-xl font-sans">
                       {module.moduleDescription}
                     </p>
                   </CardDescription>
-                  <CardContent className="text-xl font-extrabold pt-4 pl-2">
+                  <CardContent className="text-lg md:text-xl font-extrabold pt-4 pl-2">
                     Learning Outcomes:{" "}
-                    <p className="font-normal text-xl font-sans">
+                    <p className="font-normal text-base md:text-xl font-sans">
                       {module.learnOutcome1}
                     </p>
                   </CardContent>
                 </Card>
               </div>
             </div>
-            <div className="mt-4 flex justify-center w-full">
+            <div className="mt-4 flex flex-col md:flex-row justify-center w-full">
               <Button
                 size="lg"
-                className="mr-4 mt-2 drop-shadow-2xl shadow-black transition ease-in-out delay-100 bg-blue-500 hover:-translate-y-1 hover:scale-110 hover:bg-indigo-500 duration-300"
+                className="mr-0 md:mr-4 mt-2 drop-shadow-2xl shadow-black transition ease-in-out delay-100 bg-blue-500 hover:-translate-y-1 hover:scale-110 hover:bg-indigo-500 duration-300"
                 onClick={handleEndModule}
               >
                 End Module

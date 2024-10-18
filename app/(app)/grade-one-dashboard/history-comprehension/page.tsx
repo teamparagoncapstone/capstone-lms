@@ -1,4 +1,3 @@
-// app/(app)/grade-one-dashboard/history-comprehension/[studentId]/page.tsx
 "use client";
 import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation"; // for dynamic params
@@ -44,7 +43,9 @@ const ComprehensionHistory: React.FC = () => {
     if (!studentId) return; // If no studentId, exit early
     const fetchHistory = async () => {
       try {
-        const response = await fetch(`/api/comprehension-one-history?studentId=${studentId}`);
+        const response = await fetch(
+          `/api/comprehension-one-history?studentId=${studentId}`
+        );
         const data = await response.json();
 
         if (data.status === "success") {
@@ -66,7 +67,8 @@ const ComprehensionHistory: React.FC = () => {
   const filteredHistory = history.filter(
     (item) =>
       (item.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (item.voice && item.voice.toLowerCase().includes(searchQuery.toLowerCase()))) &&
+        (item.voice &&
+          item.voice.toLowerCase().includes(searchQuery.toLowerCase()))) &&
       item.voice
   );
 
@@ -96,7 +98,13 @@ const ComprehensionHistory: React.FC = () => {
   if (error) return <p>Error: {error}</p>;
 
   return (
-    <div className="w-full min-h-screen bg-center bg-cover" style={{ backgroundImage: 'url("/images/comprehension-test-history.png")', backgroundSize: "cover" }}>
+    <div
+      className="w-full min-h-screen bg-center bg-cover"
+      style={{
+        backgroundImage: 'url("/images/comprehension-test-history1.png")',
+        backgroundSize: "cover",
+      }}
+    >
       {/* Navbar */}
       <div className="w-full bg-blue-50 h-auto md:h-16 shadow-lg">
         <div className="flex h-16 items-center px-4">
@@ -140,12 +148,24 @@ const ComprehensionHistory: React.FC = () => {
           <tbody>
             {currentData.map((item) => (
               <tr key={item.id} className="hover:bg-gray-50">
-                <td className="py-4 px-4 border-b text-blue-600">{item.voice}</td>
-                <td className="py-4 px-4 border-b text-gray-800">{item.question}</td>
-                <td className="py-4 px-4 border-b text-green-600 font-medium">{item.score}</td>
-                <td className="py-4 px-4 border-b text-gray-700">{item.correctAnswersCount}</td>
-                <td className="py-4 px-4 border-b text-gray-700">{item.wrongAnswersCount}</td>
-                <td className="py-4 px-4 border-b text-gray-600">{item.feedback || "No feedback"}</td>
+                <td className="py-4 px-4 border-b text-blue-600">
+                  {item.voice}
+                </td>
+                <td className="py-4 px-4 border-b text-gray-800">
+                  {item.question}
+                </td>
+                <td className="py-4 px-4 border-b text-green-600 font-medium">
+                  {item.score}
+                </td>
+                <td className="py-4 px-4 border-b text-gray-700">
+                  {item.correctAnswersCount}
+                </td>
+                <td className="py-4 px-4 border-b text-gray-700">
+                  {item.wrongAnswersCount}
+                </td>
+                <td className="py-4 px-4 border-b text-gray-600">
+                  {item.feedback || "No feedback"}
+                </td>
               </tr>
             ))}
           </tbody>
@@ -154,7 +174,11 @@ const ComprehensionHistory: React.FC = () => {
           <button
             onClick={() => handlePageChange(currentPage - 1)}
             disabled={currentPage === 1}
-            className={`px-4 py-2 rounded-md ${currentPage === 1 ? "bg-gray-300 text-gray-500 cursor-not-allowed" : "bg-blue-500 text-white"}`}
+            className={`px-4 py-2 rounded-md ${
+              currentPage === 1
+                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                : "bg-blue-500 text-white"
+            }`}
           >
             Previous
           </button>
@@ -164,7 +188,11 @@ const ComprehensionHistory: React.FC = () => {
           <button
             onClick={() => handlePageChange(currentPage + 1)}
             disabled={currentPage === totalPages}
-            className={`px-4 py-2 rounded-md ${currentPage === totalPages ? "bg-gray-300 text-gray-500 cursor-not-allowed" : "bg-blue-500 text-white"}`}
+            className={`px-4 py-2 rounded-md ${
+              currentPage === totalPages
+                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                : "bg-blue-500 text-white"
+            }`}
           >
             Next
           </button>

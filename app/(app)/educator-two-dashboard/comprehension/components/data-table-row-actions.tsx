@@ -96,10 +96,9 @@ export function DataTableRowActions<TData>({
     grade: row.original.grade || Grade.GradeOne,
     image: row.original.image || "",
   });
-  const [formErrors] = useState<any>({});
+  const [formErrors, setFormErrors] = useState<any>({});
   const [isLoading, setIsLoading] = useState(false);
 
-  // Fetching modules on mount
   useEffect(() => {
     const fetchModules = async () => {
       try {
@@ -125,14 +124,13 @@ export function DataTableRowActions<TData>({
       }
     };
     fetchModules();
-  }, [formData.moduleId]); // Now includes 'formData.moduleId'
+  }, []);
 
-  // Sync selectedModuleId with formData.moduleId
   useEffect(() => {
     if (formData.moduleId) {
       setSelectedModuleId(formData.moduleId);
     }
-  }, [formData.moduleId]); // This effect runs when formData.moduleId changes
+  }, [formData.moduleId]);
 
   const handleChange = (field: keyof FormData, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -270,7 +268,7 @@ export function DataTableRowActions<TData>({
                       className={formErrors.Option2 ? "invalid" : ""}
                     />
                   </div>
-                  <div className="w-auto pl-4">
+                  <div className="w-auto pl-4 pr-4">
                     <Label htmlFor="Option3">Option 3</Label>
                     <Input
                       id="Option3"
@@ -280,26 +278,70 @@ export function DataTableRowActions<TData>({
                       className={formErrors.Option3 ? "invalid" : ""}
                     />
                   </div>
-                  <div className="w-auto pl-4">
-                    <Label htmlFor="CorrectAnswers">Correct Answer</Label>
-                    <Input
-                      id="CorrectAnswers"
-                      required
-                      value={formData.CorrectAnswers}
-                      onChange={(e) =>
-                        handleChange("CorrectAnswers", e.target.value)
-                      }
-                      className={formErrors.CorrectAnswers ? "invalid" : ""}
-                    />
-                  </div>
-                  <div className="w-auto pl-4">
-                    <Label htmlFor="modules">Modules</Label>
-                    <Select
-                      onValueChange={(value) => handleSelectChange(value)}
-                      value={selectedModuleId}
+                </div>
+                <div className="w-1/2 mt-2 pl-4 pr-4">
+                  <Label>Select Correct Answer</Label>
+                  <Select
+                    onValueChange={(value: string) =>
+                      handleChange("CorrectAnswers", value)
+                    }
+                    value={formData.CorrectAnswers}
+                  >
+                    <SelectTrigger
+                      id="correctAnswer"
+                      aria-label="Select correct answer"
                     >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a module" />
+                      <SelectValue placeholder="Select correct answer" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {[
+                        formData.Option1,
+                        formData.Option2,
+                        formData.Option3,
+                      ].map(
+                        (answer, index) =>
+                          answer && (
+                            <SelectItem key={index} value={answer}>
+                              {answer}
+                            </SelectItem>
+                          )
+                      )}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex">
+                  <div className="w-1/2 mt-2 pl-4">
+                    <Label>Select Grade</Label>
+                    <Select
+                      onValueChange={(value: string) =>
+                        handleChange("grade", value as Grade)
+                      }
+                      value={formData.grade}
+                    >
+                      <SelectTrigger id="grade" aria-label="Select grade">
+                        <SelectValue placeholder="Select grade" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value={Grade.GradeOne}>Grade 1</SelectItem>
+                        <SelectItem value={Grade.GradeTwo}>Grade 2</SelectItem>
+                        <SelectItem value={Grade.GradeThree}>
+                          Grade 3
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="w-1/2 mt-2 pl-4 pr-4">
+                    <Label>Select Module</Label>
+                    <Select
+                      onValueChange={handleSelectChange}
+                      value={
+                        filteredModules.find(
+                          (module) => module.id === selectedModuleId
+                        )?.moduleTitle || ""
+                      }
+                    >
+                      <SelectTrigger id="module" aria-label="Select module">
+                        <SelectValue placeholder="Select module" />
                       </SelectTrigger>
                       <SelectContent>
                         {filteredModules.map((module) => (
@@ -316,19 +358,35 @@ export function DataTableRowActions<TData>({
                 </div>
               </CardContent>
             </Card>
+            <Card className="item-center justify-center flex flex-col">
+              <CardContent>
+                <Label className="flex flex-col item-center pt-2">
+                  Upload Image
+                </Label>
+                <FileUpload
+                  apiEndpoint="moduleImage"
+                  value={formData.image}
+                  onChange={(url) => url && handleChange("image", url)}
+                  className={`${
+                    formErrors.image ? "invalid" : ""
+                  } items-right pt-2`}
+                />
+              </CardContent>
+            </Card>
             <DialogFooter>
-              <Button type="submit" disabled={isLoading}>
-                {isLoading ? (
-                  <>
-                    <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />{" "}
-                    Please wait
-                  </>
-                ) : (
-                  <>
-                    <CheckCircledIcon className="mr-2 h-4 w-4" /> Save changes
-                  </>
-                )}
-              </Button>
+              <div className="flex justify-center w-full">
+                <Button className="w-1/4 mr-6" onClick={handleSubmit}>
+                  {isLoading ? (
+                    <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <CheckCircledIcon className="mr-2 h-4 w-4" />
+                  )}
+                  {isLoading ? "Updating..." : "Submit"}
+                </Button>
+                <Button className="w-1/4" onClick={() => setIsOpen(false)}>
+                  Cancel
+                </Button>
+              </div>
             </DialogFooter>
           </DialogContent>
         </form>
@@ -336,34 +394,29 @@ export function DataTableRowActions<TData>({
 
       <Dialog open={isDeleteConfirmOpen} onOpenChange={setIsDeleteConfirmOpen}>
         <DialogTrigger asChild>
-          <Button className="sr-only">Delete</Button>
+          <Button className="sr-only">Delete Comprehension Test</Button>
         </DialogTrigger>
-        <DialogContent>
+        <DialogContent className="md:max-w-md sm:max-w-sm">
           <DialogHeader>
-            <DialogTitle>Confirm Delete</DialogTitle>
+            <DialogTitle>Confirm Deletion</DialogTitle>
             <DialogDescription>
               Are you sure you want to delete this comprehension test?
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="secondary" onClick={() => setIsDeleteConfirmOpen(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setIsDeleteConfirmOpen(false)}
+            >
               Cancel
             </Button>
-            <Button
-              variant="destructive"
-              onClick={handleDelete}
-              disabled={isLoading}
-            >
+            <Button className="ml-2" onClick={handleDelete}>
               {isLoading ? (
-                <>
-                  <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />{" "}
-                  Please wait
-                </>
+                <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
               ) : (
-                <>
-                  <TrashIcon className="mr-2 h-4 w-4" /> Delete
-                </>
+                <TrashIcon className="mr-2 h-4 w-4" />
               )}
+              {isLoading ? "Deleting..." : "Delete"}
             </Button>
           </DialogFooter>
         </DialogContent>

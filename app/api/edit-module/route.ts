@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma'; 
+import { prisma } from '@/lib/prisma';
+import { logAudit } from '@/lib/auditLogger'; 
 
 enum Grade {
   GradeOne = 'GradeOne',
@@ -35,6 +36,7 @@ export async function PUT(req: Request) {
       return NextResponse.json({ error: 'Module ID is required' }, { status: 400 });
     }
 
+    
     const updatedModule = await prisma.module.update({
       where: { id: body.id },
       data: {
@@ -47,6 +49,9 @@ export async function PUT(req: Request) {
         subjects: body.subjects,
       },
     });
+
+
+    await logAudit(null, 'Update Module', 'Module', `Updated module : ${body.moduleTitle}`);
 
     return NextResponse.json(updatedModule);
   } catch (error) {
@@ -63,9 +68,12 @@ export async function DELETE(req: Request) {
       return NextResponse.json({ error: 'Module ID is required' }, { status: 400 });
     }
 
+    
     const deletedModule = await prisma.module.delete({
       where: { id: body.id },
     });
+
+    await logAudit(null, 'Delete Module', 'Module', `Deleted module with ID: ${body.id}`);
 
     return NextResponse.json(deletedModule);
   } catch (error) {

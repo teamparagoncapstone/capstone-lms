@@ -1,5 +1,6 @@
 "use client";
 import React, { useState } from "react";
+import Image from "next/image";
 import { Row } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import {
@@ -35,7 +36,6 @@ import {
   DotsHorizontalIcon,
 } from "@radix-ui/react-icons";
 import toast from "react-hot-toast";
-import Image from 'next/image';
 import { EyeIcon, EyeOffIcon } from "lucide-react";
 
 enum Grade {
@@ -99,7 +99,7 @@ export function DataTableRowActions<TData>({
     image: row.original.image || "",
   });
 
-  const [formErrors] = useState<any>({});
+  const [formErrors, setFormErrors] = useState<any>({});
   const [isLoading, setIsLoading] = useState(false);
 
   const togglePasswordVisibility = () => {

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma'; 
+import { prisma } from '@/lib/prisma';
+import { logAudit } from '@/lib/auditLogger'; 
 
 enum Grade {
   GradeOne = 'GradeOne',
@@ -7,11 +8,10 @@ enum Grade {
   GradeThree = 'GradeThree',
 }
 
-
 interface UpdateVoiceRequestBody {
   id: string;
   voice: string;
-  voiceImage  : string;
+  voiceImage: string;
   grade: Grade;
 }
 
@@ -27,15 +27,17 @@ export async function PUT(req: Request) {
       return NextResponse.json({ error: 'Voice ID is required' }, { status: 400 });
     }
 
+    
     const updatedVoiceExcercises = await prisma.voiceExcercises.update({
       where: { id: body.id },
       data: {
-        voice: body. voice,
-        voiceImage  : body. voiceImage  ,
-        grade: body. grade,
-        
+        voice: body.voice,
+        voiceImage: body.voiceImage,
+        grade: body.grade,
       },
     });
+
+    await logAudit(body.id, 'Update VoiceExercies', 'VoiceExercise', `Updated voice exercise with ID: ${body.voice}`);
 
     return NextResponse.json(updatedVoiceExcercises);
   } catch (error) {
@@ -52,9 +54,13 @@ export async function DELETE(req: Request) {
       return NextResponse.json({ error: 'Voice Exercises ID is required' }, { status: 400 });
     }
 
+    // Delete the voice exercise
     const deletedVoiceExercises = await prisma.voiceExcercises.delete({
       where: { id: body.id },
     });
+
+    // Log the deletion action
+    await logAudit(body.id, 'Delete VoiceExercises', 'VoiceExercise', `Deleted voice exercise with ID: ${body.id}`);
 
     return NextResponse.json(deletedVoiceExercises);
   } catch (error) {

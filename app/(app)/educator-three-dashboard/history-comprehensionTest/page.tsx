@@ -201,7 +201,7 @@ export default function ComprehensionHistory() {
         className="flex-1 w-full bg-cover bg-center"
         style={{
           backgroundImage:
-            'url("/images/comprehension-test-teacher-history.png")',
+            'url("/images/comprehension-test-teacher-history1.png")',
         }}
       >
         <div className="w-full md:w-4/5 lg:w-1/2 mx-auto p-8 bg-white rounded-lg shadow-md mt-4">

@@ -1,10 +1,11 @@
 
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { logAudit } from "@/lib/auditLogger"
 
 export async function POST(req: Request) {
   try {
-    const { moduleTitle,  moduleDescription, learnOutcome1, videoModule, imageModule, grade, subjects, } = await req.json();
+    const { moduleTitle,  moduleDescription, learnOutcome1, videoModule, imageModule, grade, subjects, userId  } = await req.json();
 
     if (!moduleTitle || !moduleDescription || !learnOutcome1 ||!videoModule ||!imageModule ||!grade ||!subjects ) {
       return NextResponse.json({
@@ -24,7 +25,9 @@ export async function POST(req: Request) {
         subjects
       },
     });
-
+    
+    await logAudit(userId, "Module Creation", module.id, `Created module: ${moduleTitle}`);
+    
     return NextResponse.json({
       status: 'success',
       user: {

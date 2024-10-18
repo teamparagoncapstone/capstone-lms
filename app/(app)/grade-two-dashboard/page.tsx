@@ -10,14 +10,13 @@ import { useEffect, useState } from "react";
 import { Separator } from "@/components/ui/separator";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import UnauthorizedPage from "@/components/forms/unauthorized";
-import Loading from "./loading";
-
 import {
   FaClipboardList,
   FaClipboardCheck,
   FaHourglassHalf,
 } from "react-icons/fa";
+import UnauthorizedPage from "@/components/forms/unauthorized";
+import Loading from "./loading";
 
 interface QuizHistoryItem {
   Question: {
@@ -31,20 +30,21 @@ interface QuizHistoryItem {
 
 export default function DashboardPage() {
   const { data: session, status } = useSession();
+  const router = useRouter();
   const [quizHistory, setQuizHistory] = useState<QuizHistoryItem[]>([]);
-  const [completedModuleTitles, setCompletedModuleTitles] = useState<Set<string>>(new Set());
+  const [completedModuleTitles, setCompletedModuleTitles] = useState<
+    Set<string>
+  >(new Set());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [assignedCount, setAssignedCount] = useState(0);
-
-  // Move useRouter hook here, so it is always called unconditionally
-  const router = useRouter();
+  const [gradeTwoModules, setGradeTwoModules] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
       if (!session) return;
 
-      if (session?.user?.grade !== "GradeOne") {
+      if (session?.user?.grade !== "GradeTwo") {
         setLoading(false);
         return;
       }
@@ -52,46 +52,50 @@ export default function DashboardPage() {
       const studentId = session.user.studentId;
 
       try {
-        const quizResponse = await fetch(`/api/get-quiz-history?studentId=${studentId}`);
+        // Fetch Quiz History
+        const quizResponse = await fetch(
+          `/api/get-quiz-history?studentId=${studentId}`
+        );
         if (!quizResponse.ok) throw new Error("Failed to fetch quiz history");
         const quizData = await quizResponse.json();
-
         const uniqueQuizTitles = new Set<string>();
         quizData.history.forEach((quiz: QuizHistoryItem) => {
           if (quiz.completed) {
             uniqueQuizTitles.add(quiz.Question.Module.moduleTitle);
           }
         });
-
         setCompletedModuleTitles(uniqueQuizTitles);
         setQuizHistory(quizData.history);
 
-        const assignedResponse = await fetch(`/api/fetch-assigned-modules?studentId=${studentId}`);
+        // Fetch Assigned Modules
+        const assignedResponse = await fetch(
+          `/api/fetch-assigned-modules?studentId=${studentId}`
+        );
         if (!assignedResponse.ok)
           throw new Error("Failed to fetch assigned modules");
         const assignedData = await assignedResponse.json();
-
         const assignedModuleTitles = new Set<string>();
         assignedData.assignedModules.forEach((module: any) => {
           assignedModuleTitles.add(module.moduleTitle);
         });
-
         setCompletedModuleTitles(
-          (prevTitles) =>
-            new Set([
-              ...Array.from(prevTitles),
-              ...Array.from(assignedModuleTitles),
-            ])
+          new Set([
+            ...Array.from(uniqueQuizTitles),
+            ...Array.from(assignedModuleTitles),
+          ])
         );
 
-        const gradeOneResponse = await fetch("/api/grade-two-module");
-        if (!gradeOneResponse.ok)
-          throw new Error("Failed to fetch grade one modules");
-        const gradeOneData = await gradeOneResponse.json();
-
-        setAssignedCount(gradeOneData.count);
+        // Fetch Grade Two Modules
+        const gradeTwoResponse = await fetch("/api/grade-two-module");
+        if (!gradeTwoResponse.ok)
+          throw new Error("Failed to fetch grade two modules");
+        const gradeTwoData = await gradeTwoResponse.json();
+        setGradeTwoModules(gradeTwoData.modules);
+        setAssignedCount(gradeTwoData.modules.length);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "An unknown error occurred");
+        setError(
+          err instanceof Error ? err.message : "An unknown error occurred"
+        );
       } finally {
         setLoading(false);
       }
@@ -99,10 +103,9 @@ export default function DashboardPage() {
     fetchData();
   }, [session]);
 
-  // Always call the router hook before the conditional returns
   if (status === "loading") return <Loading />;
 
-  if (status === "unauthenticated" || session?.user?.grade !== "GradeOne") {
+  if (status === "unauthenticated" || session?.user?.grade !== "GradeTwo") {
     return <UnauthorizedPage />;
   }
 
@@ -123,8 +126,8 @@ export default function DashboardPage() {
         <Separator />
       </div>
       <div
-        className="bg-cover bg-center h-screen absolute top-0 left-0 w-full bg-opacity-100"
-        style={{ backgroundImage: 'url("/images/voice1-bg.jpg")' }}
+        className="bg-cover bg-center h-screen absolute top -0 left-0 w-full bg-opacity-100"
+        style={{ backgroundImage: 'url("/images/voice2_bg1.jpg")' }}
       >
         <div className="flex-1 space-y-4 p-8 md:p-4 pt-6">
           <div className="flex flex-col md:flex-row items-center justify-between space-y-2 md:space-y-0 md:items-center">
@@ -133,7 +136,7 @@ export default function DashboardPage() {
             </h2>
             <div>
               <h2 className="text-4xl font-bold tracking-tight text-center text-green-600 z-10">
-                Grade 3
+                Grade 2
               </h2>
             </div>
             <div className="flex items-center space-x-2 z-10">
@@ -142,7 +145,7 @@ export default function DashboardPage() {
                   router.push("/grade-two-dashboard/module-homepage")
                 }
                 size="lg"
-                className="ml-auto mt-8 mr-4 bg-blue-500 hover:bg-blue-400 transition z-10"
+                className="ml-auto mt-8 mr-4 bg-orange-500 hover:bg-orange-400 transition z-10"
               >
                 Go to Module
               </Button>
@@ -227,17 +230,94 @@ export default function DashboardPage() {
             </TabsContent>
           </Tabs>
         </div>
-        {/* Add playful background elements */}
-        <div className="absolute top-10 left-10 w-32 h-32 bg-blue-200 rounded-full opacity-30 animate-bounce "></div>
-        <div className="absolute bottom-10 right-10 w-32 h-32 bg-yellow-200 rounded-full opacity-30 animate-bounce "></div>
-        <div className="absolute top-20 right-20 w-24 h-24 bg-purple-300 rounded-full opacity-40 animate-pulse "></div>
-        <div className="absolute bottom-20 left-20 w-28 h-28 bg-green-300 rounded-full opacity-30 animate-spin "></div>
-        <div className="absolute top-40 left-5 w-16 h-16 bg-pink-400 rounded-full opacity-50 animate-bounce "></div>
-        <div className="absolute bottom-40 right-5 w-20 h-20 bg-orange-300 rounded-full opacity-30 animate-bounce "></div>
-        <div className="absolute top-24 left-24 w-36 h-36 bg-red-300 rounded-full opacity-25 animate-bounce "></div>
-        <div className="absolute bottom-10 left-40 w-30 h-30 bg-teal-200 rounded-full opacity-35 animate-pulse "></div>
-        <div className="absolute top-36 right-5 w-20 h-20 bg-indigo-300 rounded-full opacity-40 animate-spin "></div>
+        {/* Playful background elements */}
+        <div className="absolute top-10 left-10 w-32 h-32 bg-gradient-to-r from-blue-200 to-indigo-300 rounded-full opacity-40 animate-bounce-slow"></div>
+        <div className="absolute bottom-10 right-10 w-32 h-32 bg-gradient-to-r from-yellow-200 to-orange-300 rounded-full opacity-40 animate-bounce-fast"></div>
+        <div className="absolute top-20 right-20 w-24 h-24 bg-gradient-to-r from-purple-300 to-pink-400 rounded-full opacity-50 animate-pulse"></div>
+        <div className="absolute bottom-20 left-20 w-28 h-28 bg-gradient-to-r from-green-300 to-teal-400 rounded-full opacity-40 animate-spin-slow"></div>
+        <div className="absolute top-40 left-5 w-16 h-16 bg-gradient-to-r from-pink-400 to-red-500 rounded-full opacity-60 animate-bounce-alt"></div>
+        <div className="absolute bottom-40 right-5 w-20 h-20 bg-gradient-to-r from-orange-300 to-yellow-500 rounded-full opacity-35 animate-bounce"></div>
+        <div className="absolute top-24 left-24 w-36 h-36 bg-gradient-to-r from-red-300 to-purple-300 rounded-full opacity-30 animate-pulse-slow"></div>
+        <div className="absolute bottom-10 left-40 w-30 h-30 bg-gradient-to-r from-teal-200 to-blue-300 rounded-full opacity-40 animate-pulse-alt"></div>
+        <div className="absolute top-36 right-5 w-20 h-20 bg-gradient-to-r from-indigo-300 to-blue-500 rounded-full opacity-45 animate-spin-fast"></div>
       </div>
+      <style jsx>{`
+        @keyframes bounce-slow {
+          0%,
+          100% {
+            transform: translateY(0);
+          }
+          50% {
+            transform: translateY(-20px);
+          }
+        }
+        @keyframes bounce-fast {
+          0%,
+          100% {
+            transform: translateY(0);
+          }
+          50% {
+            transform: translateY(-30px);
+          }
+        }
+        @keyframes pulse-slow {
+          0%,
+          100% {
+            transform: scale(1);
+            opacity: 0.3;
+          }
+          50% {
+            transform: scale(1.1);
+            opacity: 0.5;
+          }
+        }
+        @keyframes pulse-alt {
+          0%,
+          100% {
+            transform: scale(1);
+            opacity: 0.4;
+          }
+          50% {
+            transform: scale(0.9);
+            opacity: 0.6;
+          }
+        }
+        @keyframes spin-slow {
+          from {
+            transform: rotate(0deg);
+          }
+          to {
+            transform: rotate(360deg);
+          }
+        }
+        @keyframes spin-fast {
+          from {
+            transform: rotate(0deg);
+          }
+          to {
+            transform: rotate(360deg);
+          }
+        }
+
+        .animate-bounce-slow {
+          animation: bounce-slow 3s infinite;
+        }
+        .animate-bounce-fast {
+          animation: bounce-fast 2s infinite;
+        }
+        .animate-pulse-slow {
+          animation: pulse-slow 4s infinite;
+        }
+        .animate-pulse-alt {
+          animation: pulse-alt 3s infinite;
+        }
+        .animate-spin-slow {
+          animation: spin-slow 6s linear infinite;
+        }
+        .animate-spin-fast {
+          animation: spin-fast 4s linear infinite;
+        }
+      `}</style>
     </div>
   );
 }

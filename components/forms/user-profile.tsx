@@ -23,6 +23,7 @@ import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 
 interface User {
+  id: string;
   name: string;
   username: string;
   email: string;
@@ -36,6 +37,7 @@ export function UserProfile() {
   const loading = status === "loading";
   const [userData, setUserData] = useState<User | null>(null);
   const [name, setName] = useState("");
+  const [password, setPassword] = useState(""); // New state for password
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -76,9 +78,38 @@ export function UserProfile() {
     }
   }, [loading, session]);
 
-  const handleSave = () => {
-    // Implement save logic here
-    console.log("Save button clicked. Implement save logic.");
+  const handleSave = async () => {
+    if (!userData) return;
+
+    const updateUser = {
+      id: userData.id,
+      name,
+      username: session?.user?.username,
+      email: userData.email,
+      password: password ? password : null, // Use the password state here
+    };
+
+    try {
+      const response = await fetch(
+        `/api/user-profile-educator?educatorId=${userData.id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(updateUser),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log("User updated successfully:", result);
+    } catch (error) {
+      setError((error as Error).message || "An unexpected error occurred");
+    }
   };
 
   if (loading) return <div>Loading...</div>;
@@ -128,21 +159,23 @@ export function UserProfile() {
               id="username"
               value={session?.user?.username || ""}
               className="col-span-3 text-xs"
-              readOnly
+              readOnly // Make username read-only if needed
             />
             <Label htmlFor="email">Email</Label>
             <Input
               id="email"
               value={userData?.email || ""}
               className="col-span-3"
-              readOnly
+              readOnly // Make email read-only if needed
             />
             <Label htmlFor="password">Password</Label>
             <Input
               id="password"
-              value={userData?.password || ""}
+              placeholder="Leave blank to keep current password"
+              type="password"
               className="col-span-3"
-              readOnly
+              value={password} // Bind the input to the state
+              onChange={(e) => setPassword(e.target.value)} // Update state on change
             />
           </div>
         </div>

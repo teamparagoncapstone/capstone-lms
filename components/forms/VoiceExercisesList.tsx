@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState, useRef } from "react";
-import Image from 'next/image';
+import Image from "next/image";
 import { Mic, StopCircle, Play } from "lucide-react";
 import { useSession } from "next-auth/react";
 import {
@@ -12,14 +12,16 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-
+import { useRouter } from "next/navigation";
 import ComprehensionList from "./comprehensionList";
-
+import { FaArrowLeft } from "react-icons/fa";
+import { Button } from "@/components/ui/button";
 interface VoiceExercise {
   id: string;
   voice: string;
   voiceImage: string;
   grade: string;
+  completed?: boolean;
 }
 
 interface ScoreResponse {
@@ -30,6 +32,7 @@ interface ScoreResponse {
   final_score: number;
   grade: string;
   phonemes: string[];
+  recognized_text: string;
 }
 
 interface VoiceExercisesListProps {
@@ -51,20 +54,40 @@ const VoiceExercisesList = ({ moduleTitle }: VoiceExercisesListProps) => {
   const [error, setError] = useState<string | null>(null);
   const { data: session } = useSession();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const router = useRouter();
   useEffect(() => {
     const fetchVoiceExercises = async () => {
       try {
         const response = await fetch(
           `https://flaskapp-voice.vercel.app/api/voice-exercises?moduleTitle=${encodeURIComponent(
             moduleTitle
-          )}`
+          )}&studentId=${session?.user?.studentId}`
         );
-        if (!response.ok) throw new Error("Network response was not ok");
         const data = (await response.json()) as VoiceExercise[];
-        setVoiceExercises(data);
-        if (data.length > 0) {
-          setCurrentExercise(data[0]);
+
+        // Filter for incomplete exercises
+        const incompleteExercises = data.filter(
+          (exercise) => !exercise.completed
+        );
+        setVoiceExercises(incompleteExercises);
+
+        // Handle completed exercises
+        if (incompleteExercises.length > 0) {
+          setCurrentExercise(incompleteExercises[0]);
+        } else {
+          // No incomplete exercises, show view scores option
+          setScores({
+            accuracy_score: 0, // Placeholder values, replace with actual scores
+            pronunciation_score: 0,
+            fluency_score: 0,
+            speed_score: 0,
+            final_score: 0,
+            grade: "N/A",
+            phonemes: [],
+            recognized_text: "N/A",
+          });
+          setIsDialogOpen(true); // Show scores directly if completed
         }
       } catch (error) {
         console.error("Error fetching voice exercises:", error);
@@ -73,7 +96,6 @@ const VoiceExercisesList = ({ moduleTitle }: VoiceExercisesListProps) => {
 
     fetchVoiceExercises();
   }, [moduleTitle]);
-
   const startRecording = async () => {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
     const mediaRecorder = new MediaRecorder(stream);
@@ -155,12 +177,52 @@ const VoiceExercisesList = ({ moduleTitle }: VoiceExercisesListProps) => {
     setError(null);
     setCurrentExercise(voiceExercises.length > 0 ? voiceExercises[0] : null);
   };
+  const handleSubmitExercise = async () => {
+    try {
+      const response = await fetch(
+        "http://127.0.0.1:5000/api/submit-exercise",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            student_id: session?.user?.studentId,
+            voice_exercises_id: currentExercise?.id,
+            expected_text: currentExercise?.voice,
+            voice_image: currentExercise?.voiceImage,
+            recognized_text: scores?.recognized_text,
+            accuracy_score: scores?.accuracy_score,
+            pronunciation_score: scores?.pronunciation_score,
+            fluency_score: scores?.fluency_score,
+            speed_score: scores?.speed_score,
+            phonemes: scores?.phonemes,
+            final_score: scores?.final_score,
+          }),
+        }
+      );
+
+      if (!response.ok) throw new Error("Failed to submit exercise.");
+      setIsSubmitted(true);
+
+      setIsDialogOpen(false);
+      setCurrentExercise(null);
+    } catch (error) {
+      console.error("Error submitting exercise:", error);
+      setError("Failed to submit exercise. Please try again.");
+    }
+  };
 
   return (
     <div
       className="flex flex-col items-center justify-start min-h-screen bg-cover bg-center bg-no-repeat "
-      style={{ backgroundImage: 'url("/images/voice_bg.jpg")' }}
+      style={{ backgroundImage: 'url("/images/voice_bg1.jpg")' }}
     >
+      <Button
+        className="absolute left-4 z-10 mt-2 text-blue-500 bg-white hover:bg-black hover:text-white p-4 rounded-full shadow-lg transition-all duration-300 transform hover:scale-105 hover:shadow-2xl border border-black border-l-4"
+        onClick={() => router.back()}
+        aria-label="Go back"
+      >
+        <FaArrowLeft className="text-2xl" />
+      </Button>
       <h1 className="text-4xl font-extrabold mb-6 text-red-700 drop-shadow-lg">
         Voice Exercises
       </h1>
@@ -239,6 +301,16 @@ const VoiceExercisesList = ({ moduleTitle }: VoiceExercisesListProps) => {
               </button>
               <audio ref={audioRef} src={audioUrlRef.current || ""} />
             </div>
+
+            {scores && (
+              <button
+                onClick={handleSubmitExercise}
+                className="mt-4 bg-green-500 hover:bg-green-600 text-white font-bold rounded-md p-2 transition duration-200"
+                aria-label="Submit Exercise"
+              >
+                Submit Exercise
+              </button>
+            )}
           </div>
 
           {/* Display Error */}
@@ -328,10 +400,13 @@ const VoiceExercisesList = ({ moduleTitle }: VoiceExercisesListProps) => {
             </div>
 
             <DialogFooter>
-              <ComprehensionList voice={currentExercise?.voice || ""} />
+              {/* Conditionally render ComprehensionList only when exercise is NOT submitted */}
+              {!isSubmitted && (
+                <ComprehensionList voice={currentExercise?.voice || ""} />
+              )}
               <button
                 onClick={() => setIsDialogOpen(false)}
-                className="bg-yellow-400 hover:bg-yellow-500  font-bold rounded-md p-2 mt-4 transition duration-200"
+                className="bg-yellow-400 hover:bg-yellow-500 font-bold rounded-md p-2 mt-4 transition duration-200"
               >
                 Close
               </button>

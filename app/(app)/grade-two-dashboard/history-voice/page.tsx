@@ -99,7 +99,7 @@ export default function VoiceHistory() {
       {/* Main content with gradient background */}
       <div
         className="bg-gradient-to-r from-indigo-200 to-blue-200 min-h-screen p-4"
-        style={{ backgroundImage: 'url("/images/student-history-voice.png")' }}
+        style={{ backgroundImage: 'url("/images/student-history-voice1.png")' }}
       >
         <div className="max-w-4xl mx-auto">
           <h1 className="text-4xl font-bold mb-4 text-center text-indigo-800 drop-shadow-lg">

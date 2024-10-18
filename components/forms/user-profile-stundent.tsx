@@ -48,7 +48,7 @@ export function StudentProfile() {
         }
 
         const response = await fetch(
-          `/api/fetch-profile-student?studentId=${studentId}`
+          `/api/fetch-profile-student?studentId=${session?.user.studentId}`
         );
         const result = await response.json();
         if (result.status === "success") {
