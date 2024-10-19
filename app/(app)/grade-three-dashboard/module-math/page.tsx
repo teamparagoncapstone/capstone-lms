@@ -96,7 +96,6 @@ export default function ModuleMathPage() {
               <div className="flex-1 flex items-center justify-center mb-4 md:mb-0">
                 <Card className="w-full max-w-xs md:max-w-2xl h-auto md:h-[500px] bg-amber-300 shadow-2xl shadow-neutral-900">
                   <CardContent className="flex items-center justify-center h-full">
-                    <NextVideo src={module.videoModule} />
                   </CardContent>
                 </Card>
               </div>
