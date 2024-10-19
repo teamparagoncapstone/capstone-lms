@@ -38,8 +38,8 @@ const Navbar: React.FC = () => {
           <Image
             rel="preload"
             fetchPriority="high"
-            src="/assets/bccsi1.png"
-            alt="hero image"
+            src="bccsi1.jpg"
+            alt="bccsi logo"
             className="absolute transform translate-x -translate-y top-2.5 left-8 dark:text-white light:text-black"
             width={40}
             height={40}
