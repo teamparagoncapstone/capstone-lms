@@ -61,9 +61,7 @@ const VoiceExercisesList = ({ moduleTitle }: VoiceExercisesListProps) => {
       const fetchVoiceExercises = async () => {
         try {
           const response = await fetch(
-            `${process.env.NEXT_PUBLIC_FLASK_API_URL}/api/voice-exercises?moduleTitle=${encodeURIComponent(
-              moduleTitle
-            )}&studentId=${session.user.studentId}`
+            `/api/proxy?moduleTitle=${encodeURIComponent(moduleTitle)}&studentId=${session.user.studentId}`
           );
 
           if (!response.ok) throw new Error("Failed to fetch exercises");
