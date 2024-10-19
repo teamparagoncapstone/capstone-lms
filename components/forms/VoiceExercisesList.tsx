@@ -62,10 +62,7 @@ const VoiceExercisesList = ({ moduleTitle }: VoiceExercisesListProps) => {
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_FLASK_API_URL}/api/voice-exercises?moduleTitle=${encodeURIComponent(
             moduleTitle
-          )}&studentId=${session?.user.studentId}`,
-          {
-            credentials: "include", 
-          }
+          )}&studentId=${session?.user?.studentId}`
         );
         const data = (await response.json()) as VoiceExercise[];
 
