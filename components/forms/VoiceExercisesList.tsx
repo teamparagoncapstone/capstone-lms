@@ -57,42 +57,48 @@ const VoiceExercisesList = ({ moduleTitle }: VoiceExercisesListProps) => {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const router = useRouter();
   useEffect(() => {
-    console.log(session); 
-    if (!session || !session.user || !session.user.studentId) {
-      console.error("Student ID is undefined or session not available.");
-      setError("Please log in to access the voice exercises.");
-      return;
-    }
-  
     const fetchVoiceExercises = async () => {
-      if (!moduleTitle || !session?.user?.studentId) {
-        setError("Missing module title or student ID");
-        return;
-      }
-  
       try {
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_FLASK_API_URL}/api/voice-exercises?moduleTitle=${encodeURIComponent(moduleTitle)}&studentId=${session.user.studentId}`,
+          `${process.env.NEXT_PUBLIC_FLASK_API_URL}/api/voice-exercises?moduleTitle=${encodeURIComponent(
+            moduleTitle
+          )}&studentId=${session?.user.studentId}`,
           {
-            credentials: 'include',  // Ensures cookies are sent with the request
+            credentials: "include", 
           }
         );
-  
-        if (!response.ok) {
-          throw new Error(`Failed to fetch voice exercises: ${response.status}`);
+        const data = (await response.json()) as VoiceExercise[];
+
+        // Filter for incomplete exercises
+        const incompleteExercises = data.filter(
+          (exercise) => !exercise.completed
+        );
+        setVoiceExercises(incompleteExercises);
+
+        // Handle completed exercises
+        if (incompleteExercises.length > 0) {
+          setCurrentExercise(incompleteExercises[0]);
+        } else {
+          // No incomplete exercises, show view scores option
+          setScores({
+            accuracy_score: 0, // Placeholder values, replace with actual scores
+            pronunciation_score: 0,
+            fluency_score: 0,
+            speed_score: 0,
+            final_score: 0,
+            grade: "N/A",
+            phonemes: [],
+            recognized_text: "N/A",
+          });
+          setIsDialogOpen(true); // Show scores directly if completed
         }
-  
-        const data = await response.json();
-        setVoiceExercises(data);
-        setCurrentExercise(data[0]);  // Set the first exercise as default
       } catch (error) {
         console.error("Error fetching voice exercises:", error);
-        setError("Failed to load voice exercises.");
       }
     };
-  
+
     fetchVoiceExercises();
-  }, [moduleTitle, session]);
+  }, [moduleTitle]);
   const startRecording = async () => {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
     const mediaRecorder = new MediaRecorder(stream);
@@ -131,14 +137,15 @@ const VoiceExercisesList = ({ moduleTitle }: VoiceExercisesListProps) => {
 
     try {
       const response = await fetch(
-        "https://flask-app-voice.vercel.app/api/voice-exercises-history",
+        "http://127.0.0.1:5000/api/voice-exercises-history",
         {
           method: "POST",
           body: formData,
         }
       );
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error || "Error processing audio.");
+      if (!response.ok)
+        throw new Error(data.error || "Error processing audio.");
       setScores(data);
       setIsDialogOpen(true);
     } catch (error) {
@@ -176,7 +183,7 @@ const VoiceExercisesList = ({ moduleTitle }: VoiceExercisesListProps) => {
   const handleSubmitExercise = async () => {
     try {
       const response = await fetch(
-        "https://flask-app-voice.vercel.app/api/submit-exercise",
+        "http://127.0.0.1:5000/api/submit-exercise",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -210,7 +217,7 @@ const VoiceExercisesList = ({ moduleTitle }: VoiceExercisesListProps) => {
   return (
     <div
       className="flex flex-col items-center justify-start min-h-screen bg-cover bg-center bg-no-repeat "
-      style={{ backgroundImage: 'url("/images/voice_bg1.jpg")' }}
+      style={{ backgroundImage: 'url("/images/voice_bg.jpg")' }}
     >
       <Button
         className="absolute left-4 z-10 mt-2 text-blue-500 bg-white hover:bg-black hover:text-white p-4 rounded-full shadow-lg transition-all duration-300 transform hover:scale-105 hover:shadow-2xl border border-black border-l-4"
