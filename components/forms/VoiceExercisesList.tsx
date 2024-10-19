@@ -61,7 +61,11 @@ const VoiceExercisesList = ({ moduleTitle }: VoiceExercisesListProps) => {
       const fetchVoiceExercises = async () => {
         try {
           const response = await fetch(
-            `/api/proxy?moduleTitle=${encodeURIComponent(moduleTitle)}&studentId=${session.user.studentId}`
+            `https://flask-app-voice.vercel.app/api/voice-exercises?moduleTitle=${encodeURIComponent(moduleTitle)}&studentId=${session.user.studentId}`,
+            {
+              method: 'GET',
+              credentials: 'include',
+            }
           );
 
           if (!response.ok) throw new Error("Failed to fetch exercises");
@@ -135,7 +139,7 @@ const VoiceExercisesList = ({ moduleTitle }: VoiceExercisesListProps) => {
 
     try {
       const response = await fetch(
-        "http://127.0.0.1:5000/api/voice-exercises-history",
+        "https://flask-app-voice.vercel.app/api/voice-exercises-history",
         {
           method: "POST",
           body: formData,
@@ -181,7 +185,7 @@ const VoiceExercisesList = ({ moduleTitle }: VoiceExercisesListProps) => {
   const handleSubmitExercise = async () => {
     try {
       const response = await fetch(
-        "http://127.0.0.1:5000/api/submit-exercise",
+        "https://flask-app-voice.vercel.app/api/submit-exercise",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
