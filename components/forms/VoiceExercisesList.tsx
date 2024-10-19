@@ -57,45 +57,48 @@ const VoiceExercisesList = ({ moduleTitle }: VoiceExercisesListProps) => {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const router = useRouter();
   useEffect(() => {
-    const fetchVoiceExercises = async () => {
-      try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_FLASK_API_URL}/api/voice-exercises?moduleTitle=${encodeURIComponent(
-            moduleTitle
-          )}&studentId=${session?.user?.studentId}`
-        );
-        const data = (await response.json()) as VoiceExercise[];
+    if (session?.user?.studentId) {
+      const fetchVoiceExercises = async () => {
+        try {
+          const response = await fetch(
+            `${process.env.NEXT_PUBLIC_FLASK_API_URL}/api/voice-exercises?moduleTitle=${encodeURIComponent(
+              moduleTitle
+            )}&studentId=${session.user.studentId}`
+          );
 
-        // Filter for incomplete exercises
-        const incompleteExercises = data.filter(
-          (exercise) => !exercise.completed
-        );
-        setVoiceExercises(incompleteExercises);
+          if (!response.ok) throw new Error("Failed to fetch exercises");
 
-        // Handle completed exercises
-        if (incompleteExercises.length > 0) {
-          setCurrentExercise(incompleteExercises[0]);
-        } else {
-          // No incomplete exercises, show view scores option
-          setScores({
-            accuracy_score: 0, // Placeholder values, replace with actual scores
-            pronunciation_score: 0,
-            fluency_score: 0,
-            speed_score: 0,
-            final_score: 0,
-            grade: "N/A",
-            phonemes: [],
-            recognized_text: "N/A",
-          });
-          setIsDialogOpen(true); // Show scores directly if completed
+          const data = (await response.json()) as VoiceExercise[];
+
+          // Filter for incomplete exercises
+          const incompleteExercises = data.filter((exercise) => !exercise.completed);
+          setVoiceExercises(incompleteExercises);
+
+          // Handle completed exercises
+          if (incompleteExercises.length > 0) {
+            setCurrentExercise(incompleteExercises[0]);
+          } else {
+            // No incomplete exercises, show view scores option
+            setScores({
+              accuracy_score: 0, // Placeholder values, replace with actual scores
+              pronunciation_score: 0,
+              fluency_score: 0,
+              speed_score: 0,
+              final_score: 0,
+              grade: "N/A",
+              phonemes: [],
+              recognized_text: "N/A",
+            });
+            setIsDialogOpen(true); // Show scores directly if completed
+          }
+        } catch (error) {
+          console.error("Error fetching voice exercises:", error);
         }
-      } catch (error) {
-        console.error("Error fetching voice exercises:", error);
-      }
-    };
+      };
 
-    fetchVoiceExercises();
-  }, [moduleTitle]);
+      fetchVoiceExercises();
+    }
+  }, [moduleTitle, session]);
   const startRecording = async () => {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
     const mediaRecorder = new MediaRecorder(stream);
